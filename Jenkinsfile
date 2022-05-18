@@ -1,39 +1,65 @@
 pipeline {
+
     agent any
-    environment {
-        PROJECT_ID = 'myqwiktestproject'
-        CLUSTER_NAME = 'demo-cluster'
-        LOCATION = 'us-central1-c'
-        CREDENTIALS_ID = 'gke'
+
+    options {
+        buildDiscarder logRotator( 
+                    daysToKeepStr: '16', 
+                    numToKeepStr: '10'
+            )
     }
+
     stages {
-        stage("Checkout code") {
+        
+        stage('Cleanup Workspace') {
             steps {
-                checkout scm
+                cleanWs()
+                sh """
+                echo "Cleaned Up Workspace For Project"
+                """
             }
         }
-        stage("Build image") {
+
+        stage('Code Checkout') {
             steps {
-                script {
-                    myapp = docker.build("changanesh/hello:${env.BUILD_ID}")
-                }
+                checkout([
+                    $class: 'GitSCM', 
+                    branches: [[name: '*/master']], 
+                    userRemoteConfigs: [[url: 'https://github.com/ganeshbabuchandran/devopsdemo.git']]
+                ])
             }
         }
-        stage("Push image") {
+
+        stage(' Unit Testing') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                            myapp.push("latest")
-                            myapp.push("${env.BUILD_ID}")
-                    }
-                }
-            }
-        }        
-        stage('Deploy to GKE') {
-            steps{
-                sh "sed -i 's/hello:latest/hello:${env.BUILD_ID}/g' deployment.yaml"
-                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
+                sh """
+                echo "Running Unit Tests"
+                """
             }
         }
-    }    
+
+        stage('Code Analysis') {
+            steps {
+                sh """
+                echo "Running Code Analysis"
+                """
+            }
+        }
+
+        stage('Build Deploy Code') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh """
+                echo "Building Artifact"
+                """
+
+                sh """
+                echo "Deploying Code"
+                """
+            }
+        }
+
+    }   
 }
