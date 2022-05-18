@@ -48,12 +48,7 @@ pipeline {
                branch 'master'
            }
            steps {
-               sh """
-               echo "Building Artifact"
-               """
-               sh """
-               echo "Deploying Code"
-               """
+               sh './test/build.sh'
            }
        }
 
