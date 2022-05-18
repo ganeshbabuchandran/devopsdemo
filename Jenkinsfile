@@ -20,15 +20,21 @@ pipeline {
             }
         }
 
-    //   stage('Code Checkout') {
-    //       steps {
-    //           checkout([
-    //               $class: 'GitSCM', 
-    //               branches: [[name: '*/master']], 
-    //               userRemoteConfigs: [[url: 'https://github.com/ganeshbabuchandran/devopsdemo.git']]
-    //           ])
-    //       }
-    //   }
+       stage(' Code Checkout') {
+           steps {
+               checkout scm
+           }
+       }
+
+//       stage('Code Checkout') {
+//           steps {
+//               checkout([
+//                   $class: 'GitSCM', 
+//                   branches: [[name: '*/master']], 
+//                   userRemoteConfigs: [[url: 'https://github.com/ganeshbabuchandran/devopsdemo.git']]
+//               ])
+//           }
+//       }
        stage(' Unit Testing') {
            steps {
                sh """
