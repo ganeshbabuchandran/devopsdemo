@@ -48,6 +48,7 @@ pipeline {
                branch 'master'
            }
            steps {
+               sh "chmod +x -R ${env.WORKSPACE}"
                sh './test/build.sh'
            }
        }
